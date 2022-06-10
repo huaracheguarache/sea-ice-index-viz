@@ -102,6 +102,12 @@ def get_data(url):
     nc_url = url
     ds = xr.open_dataset(nc_url)
     ds = ds.sel(nv=0)
+    ds = ds.convert_calendar("all_leap", missing=-999)
+
+    for i, sie_val in enumerate(ds.sie.values):
+        if sie_val == -999:
+            ds.sie.values[i] = (ds.sie.values[i-1] + ds.sie.values[i+1]) / 2
+
     df = ds.to_dataframe()
     df = df.droplevel(1)
     df = df[~df.index.duplicated(keep='first')]
