@@ -109,8 +109,6 @@ def get_data(url):
             ds.sie.values[i] = (ds.sie.values[i-1] + ds.sie.values[i+1]) / 2
 
     df = ds.to_dataframe()
-    df = df.droplevel(1)
-    df = df[~df.index.duplicated(keep='first')]
     # Check whether to fetch Sea Ice Extent or Sea Ice Area.
     try:
         df["sie"]
