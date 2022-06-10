@@ -173,5 +173,6 @@ def get_plot(sie_sia, radio_group, years):
     mplot = get_mplot(df, years)
     return mplot
 
-pn.panel(pn.Column("##Sea Ice Extent", "**Hemisphere:**", pn.Column(radio_group), pn.Column(sie_sia), get_plot, pn.Column(years), width_policy="max").servable(), loading_indicator=True)
+visualize = pn.panel(pn.Column("##Sea Ice Extent", "**Hemisphere:**", pn.Column(radio_group), pn.Column(sie_sia), get_plot, pn.Column(years), width_policy="max").servable(), loading_indicator=True)
 
+visualize.show()
