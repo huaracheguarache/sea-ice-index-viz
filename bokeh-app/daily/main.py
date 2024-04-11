@@ -288,19 +288,19 @@ try:
         individual_years_glyphs_legend_list.append((year, [line_glyph]))
 
     # Plot the yearly max and min values as triangles and circles, respectively.
-    yearly_max_glyph = plot.circle(x="day_of_year",
-                                   y="index_value",
-                                   color="color",
-                                   size=6,
-                                   source=cds_yearly_max,
-                                   visible=False)
+    yearly_max_glyph = plot.scatter(x="day_of_year",
+                                    y="index_value",
+                                    color="color",
+                                    size=6,
+                                    source=cds_yearly_max,
+                                    visible=False)
 
-    yearly_min_glyph = plot.circle(x="day_of_year",
-                                   y="index_value",
-                                   color="color",
-                                   size=6,
-                                   source=cds_yearly_min,
-                                   visible=False)
+    yearly_min_glyph = plot.scatter(x="day_of_year",
+                                    y="index_value",
+                                    color="color",
+                                    size=6,
+                                    source=cds_yearly_min,
+                                    visible=False)
 
     # Plot the current year as two lines on top of each other (black and white dashed line).
     current_year_outline = plot.line(x="day_of_year",
@@ -379,7 +379,7 @@ try:
     plot.add_tools(HoverTool(renderers=individual_years_glyphs,
                              tooltips=TOOLTIPS,
                              formatters={'@rank': rank_custom},
-                             toggleable=False))
+                             visible=False))
 
     # Add a hovertool to display the date, index value, and rank of the yearly max values.
     MAX_TOOLTIPS = """
@@ -406,7 +406,7 @@ try:
     plot.add_tools(HoverTool(renderers=[yearly_max_glyph],
                              tooltips=MAX_TOOLTIPS,
                              formatters={'@rank': rank_custom},
-                             toggleable=False))
+                             visible=False))
 
     # Add a hovertool to display the date, index value, and rank of the yearly min values.
     MIN_TOOLTIPS = """
@@ -433,7 +433,7 @@ try:
     plot.add_tools(HoverTool(renderers=[yearly_min_glyph],
                              tooltips=MIN_TOOLTIPS,
                              formatters={'@rank': rank_custom},
-                             toggleable=False))
+                             visible=False))
 
     # Hardcode the x-ticks (day_of_year, date).
     plot.x_range = Range1d(start=1, end=366)
