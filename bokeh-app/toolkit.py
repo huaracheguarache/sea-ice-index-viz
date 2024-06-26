@@ -298,12 +298,12 @@ def find_yearly_min_max(da_converted, da_converted_anomaly, fill_colors_dict):
     yearly_min_rank = yearly_min_index_value.rank("year")
 
     cds_yearly_max = ColumnDataSource({"day_of_year": yearly_max_doy.values,
-                                       "index_value": yearly_max_index_value.values,
+                                       "index_values": yearly_max_index_value.values,
                                        "color": colors,
                                        "date": hovertool_max_date.values,
                                        "rank": yearly_max_rank.values})
     cds_yearly_min = ColumnDataSource({"day_of_year": yearly_min_doy.values,
-                                       "index_value": yearly_min_index_value.values,
+                                       "index_values": yearly_min_index_value.values,
                                        "color": colors,
                                        "date": hovertool_min_date.values,
                                        "rank": yearly_min_rank.values})
