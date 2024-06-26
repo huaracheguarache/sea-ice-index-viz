@@ -308,20 +308,20 @@ try:
         individual_years_glyphs.append(line_glyph)
         individual_years_glyphs_legend_list.append((year, [line_glyph]))
 
-    # Plot the yearly max and min values as triangles and circles, respectively.
+    # Plot the yearly max and min values as circles.
     yearly_max_glyph = plot.scatter(x="day_of_year",
-                                   y="index_value",
-                                   color="color",
-                                   size=6,
-                                   source=cds_yearly_max,
-                                   visible=False)
+                                    y="index_values",
+                                    color="color",
+                                    size=6,
+                                    source=cds_yearly_max,
+                                    visible=False)
 
     yearly_min_glyph = plot.scatter(x="day_of_year",
-                                   y="index_value",
-                                   color="color",
-                                   size=6,
-                                   source=cds_yearly_min,
-                                   visible=False)
+                                    y="index_values",
+                                    color="color",
+                                    size=6,
+                                    source=cds_yearly_min,
+                                    visible=False)
 
     # Plot the current year as two lines on top of each other (black and white dashed line).
     current_year_outline = plot.line(x="day_of_year",
@@ -379,89 +379,22 @@ try:
     }
     """)
 
-    if plot_type_selector.value == 'anomaly':
-        value_name = 'Anomaly:'
-        value_format = '+0.000'
-    else:
-        value_name = 'Index:'
-        value_format = '0.000'
-
-    TOOLTIPS = f"""
-    <div>
-        <div>
-            <span style="font-size: 12px; font-weight: bold">Date:</span>
-            <span style="font-size: 12px;">@date</span>
-        </div>
-        <div>
-            <span style="font-size: 12px; font-weight: bold">{value_name}</span>
-            <span style="font-size: 12px;">@index_values{{{value_format}}}</span>
-            <span style="font-size: 12px;">mill. km<sup>2</sup></span>
-        </div>
-        <div>
-            <span style="font-size: 12px; font-weight: bold">Rank:</span>
-            <span style="font-size: 12px;">@rank{{custom}}</span>
-        </div>
-    </div>
-    """
-
     individual_years_hovertool = HoverTool(renderers=individual_years_glyphs,
-                                           tooltips=TOOLTIPS,
+                                           tooltips=tk.make_tooltips('daily', plot_type_selector.value, 'other'),
                                            formatters={'@rank': rank_custom},
                                            visible=False)
     plot.add_tools(individual_years_hovertool)
 
     # Add a hovertool to display the date, index value, and rank of the yearly max values.
-    MAX_TOOLTIPS = f"""
-        <div>
-            <div>
-                <span style="font-size: 14px; font-weight: bold;">Yearly maximum</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; font-weight: bold">Date:</span>
-                <span style="font-size: 12px;">@date</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; font-weight: bold">{value_name}</span>
-                <span style="font-size: 12px;">@index_value{{{value_format}}}</span>
-                <span style="font-size: 12px;">mill. km<sup>2</sup></span>
-            </div>
-            <div>
-                <span style="font-size: 12px; font-weight: bold">Rank:</span>
-                <span style="font-size: 12px;">@rank{{custom}}</span>
-            </div>
-        </div>
-        """
-
     max_line_hovertool = HoverTool(renderers=[yearly_max_glyph],
-                                   tooltips=MAX_TOOLTIPS,
+                                   tooltips=tk.make_tooltips('daily', plot_type_selector.value, 'maximum'),
                                    formatters={'@rank': rank_custom},
                                    visible=False)
     plot.add_tools(max_line_hovertool)
 
     # Add a hovertool to display the date, index value, and rank of the yearly min values.
-    MIN_TOOLTIPS = f"""
-        <div>
-            <div>
-                <span style="font-size: 14px; font-weight: bold;">Yearly minimum</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; font-weight: bold">Date:</span>
-                <span style="font-size: 12px;">@date</span>
-            </div>
-            <div>
-                <span style="font-size: 12px; font-weight: bold">{value_name}</span>
-                <span style="font-size: 12px;">@index_value{{{value_format}}}</span>
-                <span style="font-size: 12px;">mill. km<sup>2</sup></span>
-            </div>
-            <div>
-                <span style="font-size: 12px; font-weight: bold">Rank:</span>
-                <span style="font-size: 12px;">@rank{{custom}}</span>
-            </div>
-        </div>
-        """
-
     min_line_hovertool = HoverTool(renderers=[yearly_min_glyph],
-                                   tooltips=MIN_TOOLTIPS,
+                                   tooltips=tk.make_tooltips('daily', plot_type_selector.value, 'minimum'),
                                    formatters={'@rank': rank_custom},
                                    visible=False)
     plot.add_tools(min_line_hovertool)
@@ -489,10 +422,9 @@ try:
     # Initialise the y-range, and set y-tick properties and y-label.
     plot.y_range = Range1d()
     plot.yaxis.ticker = AdaptiveTicker(base=10, mantissas=[1, 2], num_minor_ticks=4, desired_num_ticks=10)
-    if plot_type_selector.value == 'anomaly':
-        plot.yaxis.axis_label = f"{extracted_data['long_name']} Anomaly - {extracted_data['units']}"
-    else:
-        plot.yaxis.axis_label = f"{extracted_data['long_name']} - {extracted_data['units']}"
+    plot.yaxis.axis_label = tk.make_y_label(extracted_data['long_name'],
+                                            extracted_data['units'],
+                                            plot_type_selector.value)
 
     # Find the day of year with the minimum and maximum values. These are used in the zoom shortcuts.
     doy_minimum = da_converted.groupby("time.dayofyear").median().idxmin().values.astype(int)
@@ -821,30 +753,16 @@ try:
                 cds_yearly_min.data.update(new_cds_yearly_min.data)
 
                 # Update the value name and index formatting in hovertools.
-                global MIN_TOOLTIPS
-                global MAX_TOOLTIPS
-                global TOOLTIPS
-
-                if plot_type_selector.value == 'anomaly':
-                    MIN_TOOLTIPS = MIN_TOOLTIPS.replace('0.000', '+0.000').replace('Index:', 'Anomaly:')
-                    MAX_TOOLTIPS = MAX_TOOLTIPS.replace('0.000', '+0.000').replace('Index:', 'Anomaly:')
-                    TOOLTIPS = TOOLTIPS.replace('0.000', '+0.000').replace('Index:', 'Anomaly:')
-                else:
-                    MIN_TOOLTIPS = MIN_TOOLTIPS.replace('+0.000', '0.000').replace('Anomaly:', 'Index:')
-                    MAX_TOOLTIPS = MAX_TOOLTIPS.replace('+0.000', '0.000').replace('Anomaly:', 'Index:')
-                    TOOLTIPS = TOOLTIPS.replace('+0.000', '0.000').replace('Anomaly:', 'Index:')
-
-                min_line_hovertool.update(tooltips=MIN_TOOLTIPS)
-                max_line_hovertool.update(tooltips=MAX_TOOLTIPS)
-                individual_years_hovertool.update(tooltips=TOOLTIPS)
+                min_line_hovertool.update(tooltips=tk.make_tooltips('daily', plot_type_selector.value, 'minimum'))
+                max_line_hovertool.update(tooltips=tk.make_tooltips('daily', plot_type_selector.value, 'maximum'))
+                individual_years_hovertool.update(tooltips=tk.make_tooltips('daily', plot_type_selector.value, 'other'))
 
                 # Update the plot title and x-axis label.
                 trimmed_title = tk.trim_title(extracted_data["title"], plot_type_selector.value)
                 plot.title.text = trimmed_title
-                if plot_type_selector.value == 'anomaly':
-                    plot.yaxis.axis_label = f"{extracted_data['long_name']} Anomaly - {extracted_data['units']}"
-                else:
-                    plot.yaxis.axis_label = f"{extracted_data['long_name']} - {extracted_data['units']}"
+                plot.yaxis.axis_label = tk.make_y_label(extracted_data['long_name'],
+                                                        extracted_data['units'],
+                                                        plot_type_selector.value)
 
                 # Find the day of year for the average minimum and maximum values. These are global variables because
                 # they are used in other callbacks.
