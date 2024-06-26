@@ -421,3 +421,74 @@ def trim_title(title, plot_type):
         new_title = new_title.replace('Ice Extent', 'Ice Extent Anomaly')
 
     return new_title
+
+
+def make_y_label(label, units, plot_type):
+    label = label.replace('Monthly Mean ', '')
+
+    if plot_type == 'abs_anomaly':
+        label = label + ' Absolute Anomaly - ' + units
+    elif plot_type == 'rel_anomaly':
+        label = label + ' Relative Anomaly - %'
+    else:
+        label = label + ' - ' + units
+
+    return label
+
+
+def make_tooltips(frequency, plot_type, glyph_type):
+    if frequency == 'monthly':
+        date_var = '@month @year'
+        rank_append = ' (@month)'
+    else:
+        date_var = '@date'
+        rank_append = ''
+
+    if plot_type == 'abs_anomaly':
+        value_name = 'Absolute anomaly:'
+        value_format = '+0.000'
+        units = ' mill. km<sup>2</sup>'
+    elif plot_type == 'rel_anomaly':
+        value_name = 'Relative anomaly:'
+        value_format = '+0.000'
+        units = '%'
+    else:
+        value_name = 'Index:'
+        value_format = '0.000'
+        units = ' mill. km<sup>2</sup>'
+
+    if glyph_type == 'minimum':
+        title = """
+        <div>
+            <div>
+                <span style="font-size: 14px; font-weight: bold;">Yearly maximum</span>
+            </div>
+        """
+    elif glyph_type == 'maximum':
+        title = """
+        <div>
+            <div>
+                <span style="font-size: 14px; font-weight: bold;">Yearly minimum</span>
+            </div>
+        """
+    else:
+        title = '<div>'
+
+    tooltips = f"""
+    {title}
+        <div>
+            <span style="font-size: 12px; font-weight: bold">Date:</span>
+            <span style="font-size: 12px;">{date_var}</span>
+        </div>
+        <div>
+            <span style="font-size: 12px; font-weight: bold">{value_name}</span>
+            <span style="font-size: 12px;">@index_values{{{value_format}}}{units}</span>
+        </div>
+        <div>
+            <span style="font-size: 12px; font-weight: bold">Rank{rank_append}:</span>
+            <span style="font-size: 12px;">@rank{{custom}}</span>
+        </div>
+    </div>
+    """
+
+    return tooltips
