@@ -281,7 +281,7 @@ def visualisation():
 
                 for decade in decades:
                     for glyph in decade[1]:
-                        glyph.visible = True
+                        glyph.visible = False
 
                 for year in yearly:
                     year[1][0].visible = True
@@ -289,8 +289,8 @@ def visualisation():
                 last_year_outline.visible = True
                 last_year_inner.visible = True
 
-                yearly_min.visible = True
-                yearly_max.visible = True
+                yearly_min.visible = False
+                yearly_max.visible = False
 
             elif event.new == 'last_5_years':
                 p10_90.visible = True
