@@ -66,8 +66,8 @@ def daily_attrs(anomaly: str, index: str, area: str, ref_per: str, last_date: st
         if minmax_vis:
             label += f'Min/max for {first_year}-{last_year - 1}\n'
 
-    label += f'Data: Derived from OSI SAF Sea Ice Concentration CDRs v3\n' \
-             'Source: EUMETSAT OSI SAF data with R&D input from ESA CCI\n' \
+    label += f'Data: OSI SAF Sea Ice Index v3\n' \
+             'EUMETSAT OSI SAF Licensed under CC-BY 4.0\n' \
              f'Last data point: {last_date}'
 
     return title, ylabel, label
