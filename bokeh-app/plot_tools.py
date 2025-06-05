@@ -18,14 +18,14 @@ def monthly_attrs(anomaly: str, index: str, area: str, last_month: str) -> tuple
     if anomaly == 'anom':
         title = f'Monthly Mean {index_name[index]} Anomaly v3.0, {area_name[area]}'
         yaxis = f'{index_name[index]} Anomaly [million km²]'
-        label = 'Data: Derived from OSI SAF Sea Ice Concentration CDRs v3\n' \
-                'Source: EUMETSAT OSI SAF data with R&D input from ESA CCI\n' \
+        label = 'Data: OSI SAF Sea Ice Index v3\n' \
+                'EUMETSAT OSI SAF Licensed under CC-BY 4.0\n' \
                 f'Last data point: {last_month}'
     else:
         title = f'Monthly Mean {index_name[index]} v3.0, {area_name[area]}'
         yaxis = f'{index_name[index]} [million km²]'
-        label = 'Data: Derived from OSI SAF Sea Ice Concentration CDRs v3\n' \
-                'Source: EUMETSAT OSI SAF data with R&D input from ESA CCI\n' \
+        label = 'Data: OSI SAF Sea Ice Index v3\n' \
+                'EUMETSAT OSI SAF Licensed under CC-BY 4.0\n' \
                 f'Last data point: {last_month}'
 
     return title, yaxis, label
@@ -66,8 +66,8 @@ def daily_attrs(anomaly: str, index: str, area: str, ref_per: str, last_date: st
         if minmax_vis:
             label += f'Min/max for {first_year}-{last_year - 1}\n'
 
-    label += f'Data: Derived from OSI SAF Sea Ice Concentration CDRs v3\n' \
-             'Source: EUMETSAT OSI SAF data with R&D input from ESA CCI\n' \
+    label += f'Data: OSI SAF Sea Ice Index v3\n' \
+             'EUMETSAT OSI SAF Licensed under CC-BY 4.0\n' \
              f'Last data point: {last_date}'
 
     return title, ylabel, label
