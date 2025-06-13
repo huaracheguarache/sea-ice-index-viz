@@ -1,5 +1,7 @@
 from bokeh.plotting import figure
 from bokeh.models import Legend, HoverTool, CustomJSHover, Label
+from bokeh.events import DocumentReady
+from bokeh.io import curdoc
 import panel as pn
 import calendar
 from datetime import datetime
@@ -109,6 +111,10 @@ def visualisation():
                                        value='full',
                                        sizing_mode='stretch_width')
     pn.state.location.sync(trend_selector, {'value': 'trend'})
+
+    grid_selector = pn.widgets.Select(name='Plot grid:', options={'On': 'on', 'Off': 'off'}, value='on',
+                                      sizing_mode='stretch_width')
+    pn.state.location.sync(grid_selector, {'value': 'grid'})
 
     data = VisDataMonthly(plot_type_selector.value, index_selector.value, area_selector.value,
                           reference_period_selector.value, cmap_selector.value, False)
@@ -288,7 +294,8 @@ def visualisation():
                        area_selector,
                        reference_period_selector,
                        cmap_selector,
-                       trend_selector)
+                       trend_selector,
+                       grid_selector)
 
     def update_data(event):
         with pn.param.set_values(gspec, loading=True):
@@ -354,6 +361,13 @@ def visualisation():
 
                 legend.items = legend_collection
 
+    def update_grid(event):
+        with pn.param.set_values(gspec, loading=True):
+            if grid_selector.value == 'on':
+                plot.grid.visible = True
+            else:
+                plot.grid.visible = False
+
     def linking_callback(attr, old, new):
         """Create a wrapper function to use Bokeh callback functionality with a Panel callback function."""
         update_data(None)
@@ -365,6 +379,7 @@ def visualisation():
     reference_period_selector.param.watch(update_data, 'value')
     cmap_selector.param.watch(update_color_map, 'value')
     trend_selector.param.watch(update_legend, 'value')
+    grid_selector.param.watch(update_grid, 'value')
 
     # Update the plot so that the monthly data points and trend lines are plotted with a monthly offset whenever the
     # line that runs through all data points is visible.
@@ -375,6 +390,9 @@ def visualisation():
     gspec[0:5, 0:4] = pn.pane.Bokeh(plot)
     gspec[0:3, 4] = inputs
     gspec[3:5, 4] = pn.pane.PNG(f'{app_root}/assets/logo.png', sizing_mode='scale_both')
+
+    # Update grid when rendering has finished in order to read URL parameter if it exists.
+    curdoc().on_event(DocumentReady, update_grid)
 
     gspec.servable()
 
