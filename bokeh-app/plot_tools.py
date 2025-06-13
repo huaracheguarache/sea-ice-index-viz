@@ -21,13 +21,13 @@ def monthly_attrs(anomaly: str, index: str, area: str, last_month: str) -> tuple
     if anomaly == 'anom':
         title = f'Monthly Mean {index_name[index]} Anomaly v3.0, {area_name[area]}'
         yaxis = f'{index_name[index]} Anomaly [million km²]'
-        label = 'Data: OSI SAF Sea Ice Index v3\n' \
+        label = 'OSI SAF Sea Ice Index v3\n' \
                 'EUMETSAT OSI SAF Licensed under CC-BY 4.0\n' \
                 f'Last data point: {last_month}'
     else:
         title = f'Monthly Mean {index_name[index]} v3.0, {area_name[area]}'
         yaxis = f'{index_name[index]} [million km²]'
-        label = 'Data: OSI SAF Sea Ice Index v3\n' \
+        label = 'OSI SAF Sea Ice Index v3\n' \
                 'EUMETSAT OSI SAF Licensed under CC-BY 4.0\n' \
                 f'Last data point: {last_month}'
 
@@ -72,7 +72,7 @@ def daily_attrs(anomaly: str, index: str, area: str, ref_per: str, last_date: st
         if minmax_vis:
             label += f'Min/max for {first_year}-{last_year - 1}\n'
 
-    label += f'Data: OSI SAF Sea Ice Index v3\n' \
+    label += f'OSI SAF Sea Ice Index v3\n' \
              'EUMETSAT OSI SAF Licensed under CC-BY 4.0\n' \
              f'Last data point: {last_date}'
 
