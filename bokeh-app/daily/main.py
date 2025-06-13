@@ -125,6 +125,10 @@ def visualisation():
                                       sizing_mode='stretch_width')
     pn.state.location.sync(cmap_selector, {'value': 'col'})
 
+    grid_selector = pn.widgets.Select(name='Plot grid:', options={'On': 'on', 'Off': 'off'}, value='on',
+                                      sizing_mode='stretch_width')
+    pn.state.location.sync(grid_selector, {'value': 'grid'})
+
     data = VisDataDaily(plot_type_selector.value, index_selector.value, area_selector.value,
                         reference_period_selector.value, cmap_selector.value)
 
@@ -363,13 +367,21 @@ def visualisation():
             else:
                 max_zoom(plot, da, label_height, plot_type_selector.value)
 
+    def update_grid(event):
+        with pn.param.set_values(gspec, loading=True):
+            if grid_selector.value == 'on':
+                plot.grid.visible = True
+            else:
+                plot.grid.visible = False
+
     inputs = pn.Column(plot_type_selector,
                        index_selector,
                        area_selector,
                        reference_period_selector,
                        plot_shortcuts,
                        zoom_shortcuts,
-                       cmap_selector)
+                       cmap_selector,
+                       grid_selector)
 
     gspec = pn.GridSpec(sizing_mode='stretch_both')
     gspec[0:5, 0:4] = pn.pane.Bokeh(plot)
@@ -383,13 +395,18 @@ def visualisation():
     plot_shortcuts.param.watch(shortcuts_callback, 'clicked', onlychanged=False)
     zoom_shortcuts.param.watch(update_zoom, 'clicked', onlychanged=False)
     cmap_selector.param.watch(update_colour, 'value')
+    grid_selector.param.watch(update_grid, 'value')
 
     def read_params(event):
-        # Make sure to read the zoom and shortcut URL parameters (if there are any) and update the plot accordingly.
+        # Read plot shortcut URL parameter if there is one and update the plot accordingly.
         if plot_shortcuts.clicked:
             plot_shortcuts.param.trigger('clicked')
 
+        # Manually trigger zoom shortcut update to update x- and y-range.
         zoom_shortcuts.param.trigger('clicked')
+
+        # Update grid state to account for URL parameter.
+        update_grid(None)
 
     curdoc().on_event(DocumentReady, read_params)
 
