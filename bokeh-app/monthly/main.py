@@ -56,11 +56,16 @@ def visualisation():
         },
         'Southern Hemisphere Regions': {
             'Amundsen-Bellingshausen Sea': 'bell',
+            'Amundsen-Bellingshausen Sea (RH)': 'bell-rh',
             'Dronning Maud Land': 'drml',
+            'East Antarctica (RH)': 'ea-rh',
             'Indian Ocean': 'indi',
+            'King Haakon VII Sea (RH)': 'khs-rh',
             'Ross Sea': 'ross',
+            'Ross Sea (RH)': 'ross-rh',
             'Troll Station': 'trol',
             'Weddell Sea': 'wedd',
+            'Weddell Sea (RH)': 'wedd-rh',
             'Western Pacific Ocean': 'wpac',
         }
     }
