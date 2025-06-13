@@ -12,8 +12,11 @@ def monthly_attrs(anomaly: str, index: str, area: str, last_month: str) -> tuple
                  'greenland': 'East Greenland Sea', 'ess': 'East Siberian Sea', 'alaska': 'Gulf of Alaska',
                  'lawrence': 'Gulf of St. Lawrence', 'hudson': 'Hudson Bay', 'kara': 'Kara Sea', 'laptev': 'Laptev Sea',
                  'japan': 'Sea of Japan', 'okhotsk': 'Sea of Okhotsk', 'sval': 'Svalbard',
-                 'bell': 'Amundsen-Bellingshausen Sea', 'drml': 'Dronning Maud Land', 'indi': 'Indian Ocean',
-                 'ross': 'Ross Sea', 'trol': 'Troll Station', 'wedd': 'Weddell Sea', 'wpac': 'Western Pacific Ocean'}
+                 'bell': 'Amundsen-Bellingshausen Sea', 'bell-rh': 'Amundsen-Bellingshausen Sea (RH)',
+                 'drml': 'Dronning Maud Land', 'ea-rh': 'East Antarctica (RH)', 'indi': 'Indian Ocean',
+                 'khs-rh': 'King Haakon VII Sea (RH)', 'ross': 'Ross Sea', 'ross-rh': 'Ross Sea (RH)',
+                 'trol': 'Troll Station', 'wedd': 'Weddell Sea', 'wedd-rh': 'Weddell Sea (RH)',
+                 'wpac': 'Western Pacific Ocean'}
 
     if anomaly == 'anom':
         title = f'Monthly Mean {index_name[index]} Anomaly v3.0, {area_name[area]}'
@@ -41,8 +44,11 @@ def daily_attrs(anomaly: str, index: str, area: str, ref_per: str, last_date: st
                  'greenland': 'East Greenland Sea', 'ess': 'East Siberian Sea', 'alaska': 'Gulf of Alaska',
                  'lawrence': 'Gulf of St. Lawrence', 'hudson': 'Hudson Bay', 'kara': 'Kara Sea', 'laptev': 'Laptev Sea',
                  'japan': 'Sea of Japan', 'okhotsk': 'Sea of Okhotsk', 'sval': 'Svalbard',
-                 'bell': 'Amundsen-Bellingshausen Sea', 'drml': 'Dronning Maud Land', 'indi': 'Indian Ocean',
-                 'ross': 'Ross Sea', 'trol': 'Troll Station', 'wedd': 'Weddell Sea', 'wpac': 'Western Pacific Ocean'}
+                 'bell': 'Amundsen-Bellingshausen Sea', 'bell-rh': 'Amundsen-Bellingshausen Sea (RH)',
+                 'drml': 'Dronning Maud Land', 'ea-rh': 'East Antarctica (RH)', 'indi': 'Indian Ocean',
+                 'khs-rh': 'King Haakon VII Sea (RH)', 'ross': 'Ross Sea', 'ross-rh': 'Ross Sea (RH)',
+                 'trol': 'Troll Station', 'wedd': 'Weddell Sea', 'wedd-rh': 'Weddell Sea (RH)',
+                 'wpac': 'Western Pacific Ocean'}
 
     if anomaly == 'abs':
         title = f'Daily {index_name[index]} v3.0, {area_name[area]}'
