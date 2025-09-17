@@ -40,6 +40,26 @@ class VisDataDaily:
         self.cds_yearly_min = ColumnDataSource(self._year_min(self.ds_daily, cols))
         self.cds_yearly_max = ColumnDataSource(self._year_max(self.ds_daily, cols))
 
+        self.cds_forecast = {}
+        invalid_areas = ['alaska', 'bell', 'bell-rh', 'drml', 'ea-rh', 'indi',
+                         'khs-rh', 'ross', 'ross-rh', 'trol', 'wedd',
+                         'wedd-rh', 'wpac', 'sh', 'glb']
+        if area in invalid_areas:
+            for member in range(1, 11):
+                cds = ColumnDataSource({'doy': [1],
+                                        'value': [np.nan],
+                                        'date': [np.nan],
+                                        'member': [np.nan]})
+                self.cds_forecast[member] = cds
+        else:
+            path = f'/bokeh-app/data/{index}_{area}.nc'
+            ds = xr.open_dataset(path)
+
+            for member in range(1, 11):
+                da = ds[index].sel(member=member)
+                cds = ColumnDataSource(self._forecast(da, member))
+                self.cds_forecast[member] = cds
+
     def update_data(self, anomaly: str, index: str, area: str, ref_period: str, cmap: str) -> None:
         self.ds_daily, ds_clim, ds_decades = self._download_data(anomaly, index, area, ref_period)
 
@@ -66,6 +86,24 @@ class VisDataDaily:
 
         self.cds_yearly_min.data.update(self._year_min(self.ds_daily, cols))
         self.cds_yearly_max.data.update(self._year_max(self.ds_daily, cols))
+
+        invalid_areas = ['alaska', 'bell', 'bell-rh', 'drml', 'ea-rh', 'indi',
+                         'khs-rh', 'ross', 'ross-rh', 'trol', 'wedd',
+                         'wedd-rh', 'wpac', 'sh', 'glb']
+        if area in invalid_areas:
+            for member in range(1, 11):
+                data = {'doy': [1],
+                        'value': [np.nan],
+                        'date': [np.nan],
+                        'member': [np.nan]}
+                self.cds_forecast[member].data.update(data)
+        else:
+            path = f'/bokeh-app/data/{index}_{area}.nc'
+            ds = xr.open_dataset(path)
+            for member in range(1, 11):
+                da = ds[index].sel(member=member)
+                data = self._forecast(da, member)
+                self.cds_forecast[member].data.update(data)
 
     def update_colour(self, cmap: str) -> None:
         cols = [self.colours[cmap][str(year)] for year in self.ds_daily.year.values]
@@ -194,6 +232,12 @@ class VisDataDaily:
         return {'doy': ds.yearly_max_date.dt.dayofyear.values, 'value': ds.yearly_max_value.values,
                 'date': ds.yearly_max_date.dt.strftime('%Y-%m-%d').values, 'rank': ds.yearly_max_rank.values,
                 'colour': colours}
+
+    def _forecast(self, da: xr.DataArray, member: float) -> dict:
+        return {'doy': da.time.dt.dayofyear.values,
+                'value': da.values,
+                'date': da.time.dt.strftime('%Y-%m-%d').values,
+                'member': np.full(len(da.values), member)}
 
     def _get_colours(self, years: NDArray) -> dict[str, NDArray[str]]:
         colours = {}

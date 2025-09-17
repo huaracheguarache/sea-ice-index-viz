@@ -80,7 +80,7 @@ def daily_attrs(anomaly: str, index: str, area: str, ref_per: str, last_date: st
 
 
 class Tooltips:
-    def __init__(self, anom: str, yearly_glyphs: list, min_glyphs: list, max_glyphs: list) -> None:
+    def __init__(self, anom: str, yearly_glyphs: list, min_glyphs: list, max_glyphs: list, forecast_glyphs: list) -> None:
         self.yearly = HoverTool(renderers=yearly_glyphs,
                                 tooltips=self._yr_tooltips(self._value_fmt(anom)),
                                 formatters={'@rank': self._rank_fmt()},
@@ -93,6 +93,9 @@ class Tooltips:
                              tooltips=self.yr_max_tooltips(self._value_fmt(anom)),
                              formatters={'@rank': self._rank_fmt()},
                              visible=False)
+        self.forecast = HoverTool(renderers=forecast_glyphs,
+                                  tooltips=self._forecast_tooltips(self._value_fmt(anom)),
+                                  visible=False)
 
     def update(self, anom: str) -> None:
         self.yearly.update(tooltips=self._yr_tooltips(self._value_fmt(anom)))
@@ -175,6 +178,31 @@ class Tooltips:
             """
 
         return tooltips
+
+    def _forecast_tooltips(self, fmt: str) -> str:
+        tooltips = f"""
+                    <div>
+                        <div>
+                            <span style="font-size: 14px; font-weight: bold;">Forecast</span>
+                        </div>
+                        <div>
+                            <span style="font-size: 12px; font-weight: bold">Date:</span>
+                            <span style="font-size: 12px;">@date</span>
+                        </div>
+                        <div>
+                            <span style="font-size: 12px; font-weight: bold">Index:</span>
+                            <span style="font-size: 12px;">@value{{{fmt}}}</span>
+                            <span style="font-size: 12px;">mill. km<sup>2</sup></span>
+                        </div>
+                        <div>
+                            <span style="font-size: 12px; font-weight: bold">Member:</span>
+                            <span style="font-size: 12px;">@member</span>
+                        </div>
+                    </div>
+                    """
+
+        return tooltips
+
 
     def _rank_fmt(self) -> CustomJSHover:
         rank_fmt = CustomJSHover(code="""

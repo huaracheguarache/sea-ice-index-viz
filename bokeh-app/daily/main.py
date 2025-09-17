@@ -188,6 +188,13 @@ def visualisation():
     yearly_min = plot.scatter(x='doy', y='value', color='colour', size=6, source=data.cds_yearly_min, visible=False)
     yearly_max = plot.scatter(x='doy', y='value', color='colour', size=6, source=data.cds_yearly_max, visible=False)
 
+    # TODO: add forecasts here...
+    forecasts = []
+    for cds in data.cds_forecast.values():
+        fc = plot.line(x='doy', y='value', source=cds, line_width=2,
+                       line_color='black')
+        forecasts.append(fc)
+
     last_year_outline = plot.line(x='doy', y='value', source=cds_yearly[-1], line_width=2, line_color='black',
                                   name='yearly')
     last_year_inner = plot.line(x='doy', y='value', source=cds_yearly[-1], line_width=2, line_dash=[4, 4],
@@ -199,6 +206,7 @@ def visualisation():
     legend_list.extend(decades)
     legend_list.extend(yearly)
     legend_list.append((years[-1], [last_year_outline, last_year_inner]))
+    legend_list.append(('Forecasts', forecasts))
 
     n = 23
     legend_split = [legend_list[i:i + n] for i in range(0, len(legend_list), n)]
@@ -211,10 +219,11 @@ def visualisation():
     plot.legend.click_policy = 'hide'
 
     all_yearly_glyphs = [glyph[0] for year, glyph in yearly] + [last_year_outline]
-    tooltips = Tooltips(plot_type_selector.value, all_yearly_glyphs, [yearly_min], [yearly_max])
+    tooltips = Tooltips(plot_type_selector.value, all_yearly_glyphs, [yearly_min], [yearly_max], forecasts)
     plot.add_tools(tooltips.yearly)
     plot.add_tools(tooltips.min)
     plot.add_tools(tooltips.max)
+    plot.add_tools(tooltips.forecast)
 
     def update_attrs(attr, old, new):
         first_year = int(data.ds_daily.time[0].dt.year.values)
@@ -281,6 +290,9 @@ def visualisation():
                 yearly_min.visible = False
                 yearly_max.visible = False
 
+                for forecast in forecasts:
+                    forecast.visible = False
+
             elif event.new == 'show_all':
                 p10_90.visible = True
                 p25_75.visible = True
@@ -300,6 +312,9 @@ def visualisation():
 
                 yearly_min.visible = False
                 yearly_max.visible = False
+
+                for forecast in forecasts:
+                    forecast.visible = True
 
             elif event.new == 'last_5_years':
                 p10_90.visible = True
@@ -322,6 +337,9 @@ def visualisation():
 
                 last_year_outline.visible = True
                 last_year_inner.visible = True
+
+                for forecast in forecasts:
+                    forecast.visible = False
 
             else:
                 p10_90.visible = True
@@ -354,6 +372,9 @@ def visualisation():
                             year[1][0].visible = True
                         else:
                             year[1][0].visible = False
+
+                for forecast in forecasts:
+                    forecast.visible = False
 
     def update_zoom(event):
         with pn.param.set_values(gspec, loading=True):
