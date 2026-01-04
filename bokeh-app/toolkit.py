@@ -12,9 +12,13 @@ class VisDataDaily:
     def __init__(
         self, anomaly: str, rolling: str, index: str, area: str, ref_period: str, cmap: str
     ) -> None:
-        self.ds_daily, ds_clim, ds_decades, ds_forecast = self._download_data(
-            anomaly, index, area, ref_period
-        )
+        self.ds_daily = self._download_daily_data(index, area)
+        ds_clim = self._download_clim_data(index, area, ref_period)
+        ds_decades = self._download_decades_data(index, area)
+        ds_forecast = self._download_forecast_data(index, area)
+
+        if anomaly == 'anom':
+            self.ds_daily, ds_clim, ds_decades, ds_forecast = self._get_anomaly(index, ref_period, self.ds_daily, ds_clim, ds_decades, ds_forecast)
 
         self.cds_p10_90 = ColumnDataSource(self._p10_90(ds_clim, index))
         self.cds_p25_75 = ColumnDataSource(self._p25_75(ds_clim, index))
@@ -66,9 +70,15 @@ class VisDataDaily:
     def update_data(
         self, anomaly: str, rolling: str, index: str, area: str, ref_period: str, cmap: str
     ) -> None:
-        self.ds_daily, ds_clim, ds_decades, ds_forecast = self._download_data(
-            anomaly, index, area, ref_period
-        )
+        self.ds_daily = self._download_daily_data(index, area)
+        ds_clim = self._download_clim_data(index, area, ref_period)
+        ds_decades = self._download_decades_data(index, area)
+        ds_forecast = self._download_forecast_data(index, area)
+
+        if anomaly == 'anom':
+            self.ds_daily, ds_clim, ds_decades, ds_forecast = self._get_anomaly(
+                index, ref_period, self.ds_daily, ds_clim, ds_decades,
+                ds_forecast)
 
         self.cds_p10_90.data.update(self._p10_90(ds_clim, index))
         self.cds_p25_75.data.update(self._p25_75(ds_clim, index))
@@ -120,49 +130,47 @@ class VisDataDaily:
         self.cds_yearly_min.data.update(yearly_min)
         self.cds_yearly_max.data.update(yearly_max)
 
-    def _download_data(
-        self, anomaly: str, index: str, area: str, ref_period: str
-    ) -> tuple[xr.Dataset, xr.Dataset, dict[str, xr.Dataset], xr.Dataset]:
+    def _download_daily_data(self, index: str, area: str) -> xr.Dataset:
         dir = ('https://thredds.met.no/thredds/dodsC/metusers/signeaa/'
                'test-data-sii-v3p0')
-
         index_translation = {'sie': 'ice_extent', 'sia': 'ice_area'}
         path = (f'{dir}/sii_v3p0/{area}/{index_translation[index]}_{area}_'
-                f'sii-v3p0_daily.nc')
-        ds_daily = xr.open_dataset(path, cache=False).load()
+                'sii-v3p0_daily.nc')
+        ds = xr.open_dataset(path, cache=False).load()
 
-        # Change to get test files working: use hardcoded climatology paths.
-        ds_clims = {}
-        ds_decades = {}
-        clim_periods = ['1981-2010', '1991-2020']
+        return ds
+
+    def _download_clim_data(self, index: str, area: str, ref_period: str) -> xr.Dataset:
+        dir = ('https://thredds.met.no/thredds/dodsC/metusers/signeaa/'
+               'test-data-sii-v3p0')
+        index_translation = {'sie': 'ice_extent', 'sia': 'ice_area'}
+        path = (f'{dir}/clim/{area}/{index_translation[index]}_{area}_'
+                f'sii-v3p0_daily-climatology-{ref_period}.nc')
+        ds = xr.open_dataset(path, cache=False).load()
+
+        return ds
+
+    def _download_decades_data(self, index: str, area: str) -> dict[str, xr.Dataset]:
+        dir = ('https://thredds.met.no/thredds/dodsC/metusers/signeaa/'
+               'test-data-sii-v3p0')
+        index_translation = {'sie': 'ice_extent', 'sia': 'ice_area'}
+
         decades = ['1980-1989', '1990-1999', '2000-2009', '2010-2019']
+        ds_dict = {}
+        for decade in decades:
+            path = (f'{dir}/clim/{area}/{index_translation[index]}_{area}_'
+                    f'sii-v3p0_daily-climatology-{decade}.nc')
+            ds_dict[decade] = xr.open_dataset(path, cache=False).load()
 
-        for clim in clim_periods:
-            ds = xr.open_dataset(
-                f'{dir}/clim/{area}/{index_translation[index]}_'
-                f'{area}_sii-v3p0_daily-climatology-{clim}.nc',
-                cache=False,
-            ).load()
-            ds_clims[ds.attrs['climatology_period']] = ds
+        return ds_dict
 
-        for dec in decades:
-            ds = xr.open_dataset(
-                f'{dir}/clim/{area}/{index_translation[index]}_'
-                f'{area}_sii-v3p0_daily-climatology-{dec}.nc',
-                cache=False,
-            ).load()
-            ds_decades[ds.attrs['climatology_period']] = ds
+    def _download_forecast_data(self, index: str, area: str) -> xr.Dataset:
+        dir = ('https://thredds.met.no/thredds/dodsC/metusers/thomasl/'
+               'SII_forecast/final_topaz5')
+        path = f'{dir}/{index}_{area}.nc'
 
-        ds_clim = ds_clims[ref_period]
-
-        dir = (
-            'https://thredds.met.no/thredds/dodsC/metusers/thomasl/'
-            'SII_forecast/final_topaz5'
-        )
         try:
-            ds_forecast = xr.open_dataset(
-                f'{dir}/{index}_{area}.nc', cache=False
-            ).load()
+            ds = xr.open_dataset(path, cache=False).load()
         except OSError:
             # Create a fake Dataset when forecast data does not exist for a
             # given region. This can for example be for regions in the
@@ -173,14 +181,9 @@ class VisDataDaily:
                 'member': [i for i in range(1, 11)],
                 'time': [np.datetime64('1970-01-01')],
             }
-            ds_forecast = xr.Dataset(data_vars=data_vars, coords=coords)
+            ds = xr.Dataset(data_vars=data_vars, coords=coords)
 
-        if anomaly == 'anom':
-            ds_daily, ds_clim, ds_decades, ds_forecast = self._get_anomaly(
-                index, ref_period, ds_daily, ds_clim, ds_decades, ds_forecast
-            )
-
-        return ds_daily, ds_clim, ds_decades, ds_forecast
+        return ds
 
     def _get_anomaly(
         self,

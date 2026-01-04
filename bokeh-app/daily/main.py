@@ -7,6 +7,8 @@ import panel as pn
 import os
 
 from toolkit import VisDataDaily
+from download import DataDownloader
+from cds import Climatology, MinMaxPerDOY, Decades, Daily, MinMaxPerYear, Forecast
 from plot_tools import (
     AreaNames,
     daily_attrs,
